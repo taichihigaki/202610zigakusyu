@@ -2,29 +2,121 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>檜垣の部屋</title>
     <style>
+        /* デフォルト: オレンジテーマ */
         :root {
-            --bg-color: #f8fafc;
+            --bg-color: #fffbebf5;
             --card-bg: #ffffff;
-            --primary-yellow: #f59e0b;
+            --primary-color: #f59e0b;
             --primary-hover: #d97706;
-            --yellow-light: #fef3c7;
+            --theme-light: #fef3c7;
             --text-main: #1e293b;
             --text-sub: #64748b;
-            --border-color: #e2e8f0;
-            --chat-bg: #f1f5f9;
+            --border-color: #fcd34d;
+            --chat-bg: #fff7ed;
+            --sidebar-bg: #fef3c7;
+            --header-bg: #ffffff;
+            --bubble-me: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            --bubble-other: #ffffff;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        /* 💙 ブルーテーマ */
+        body[data-theme="blue"] {
+            --bg-color: #eff6ff;
+            --card-bg: #ffffff;
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --theme-light: #dbeafe;
+            --text-main: #0f172a;
+            --text-sub: #475569;
+            --border-color: #93c5fd;
+            --chat-bg: #f0f9ff;
+            --sidebar-bg: #e0f2fe;
+            --header-bg: #ffffff;
+            --bubble-me: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
+            --bubble-other: #ffffff;
+        }
+
+        /* 🟢 グリーンテーマ */
+        body[data-theme="green"] {
+            --bg-color: #f0fdf4;
+            --card-bg: #ffffff;
+            --primary-color: #059669;
+            --primary-hover: #047857;
+            --theme-light: #d1fae5;
+            --text-main: #064e3b;
+            --text-sub: #047857;
+            --border-color: #6ee7b7;
+            --chat-bg: #ecfdf5;
+            --sidebar-bg: #e6f4ea;
+            --header-bg: #ffffff;
+            --bubble-me: linear-gradient(135deg, #059669 0%, #34d399 100%);
+            --bubble-other: #ffffff;
+        }
+
+        /* 💜 パープルテーマ */
+        body[data-theme="purple"] {
+            --bg-color: #faf5ff;
+            --card-bg: #ffffff;
+            --primary-color: #7c3aed;
+            --primary-hover: #6d28d9;
+            --theme-light: #ede9fe;
+            --text-main: #3b0764;
+            --text-sub: #6b21a8;
+            --border-color: #c4b5fd;
+            --chat-bg: #f3e8ff;
+            --sidebar-bg: #f3e8ff;
+            --header-bg: #ffffff;
+            --bubble-me: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+            --bubble-other: #ffffff;
+        }
+
+        /* 🌸 ピンクテーマ */
+        body[data-theme="pink"] {
+            --bg-color: #fdf2f8;
+            --card-bg: #ffffff;
+            --primary-color: #db2777;
+            --primary-hover: #be185d;
+            --theme-light: #fce7f3;
+            --text-main: #831843;
+            --text-sub: #9d174d;
+            --border-color: #fbcfe8;
+            --chat-bg: #fff0f7;
+            --sidebar-bg: #fce7f3;
+            --header-bg: #ffffff;
+            --bubble-me: linear-gradient(135deg, #db2777 0%, #f472b6 100%);
+            --bubble-other: #ffffff;
+        }
+
+        /* 🌙 ダークテーマ */
+        body[data-theme="dark"] {
+            --bg-color: #090d16;
+            --card-bg: #1e293b;
+            --primary-color: #6366f1;
+            --primary-hover: #4338ca;
+            --theme-light: #312e81;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --border-color: #334155;
+            --chat-bg: #0f172a;
+            --sidebar-bg: #111827;
+            --header-bg: #1e293b;
+            --bubble-me: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+            --bubble-other: #334155;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
             overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .app-container {
@@ -39,22 +131,26 @@
             display: flex;
             flex-direction: column;
             height: 100%;
+            min-width: 0;
             background-color: var(--card-bg);
+            transition: background-color 0.3s;
         }
 
         .chat-header {
-            padding: 14px 20px;
-            border-bottom: 2px solid var(--yellow-light);
+            padding: 12px 16px;
+            border-bottom: 2px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: #ffffff;
+            background-color: var(--header-bg);
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
+            flex-shrink: 0;
+            transition: background-color 0.3s, border-color 0.3s;
         }
 
         .chat-title {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 700;
             display: flex;
             align-items: center;
@@ -63,7 +159,7 @@
 
         .crown-icon {
             color: #f59e0b;
-            font-size: 1.1rem;
+            font-size: 1rem;
             display: none;
         }
 
@@ -72,99 +168,344 @@
         .header-actions {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         .user-display {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 600;
             color: var(--text-sub);
             background-color: var(--chat-bg);
-            padding: 6px 12px;
+            padding: 4px 10px;
             border-radius: 20px;
             border: 1px solid var(--border-color);
         }
 
         #chat-log {
             flex: 1;
-            padding: 16px;
+            padding: 12px 16px;
             overflow-y: auto;
             background-color: var(--chat-bg);
             display: flex;
             flex-direction: column;
             gap: 12px;
+            -webkit-overflow-scrolling: touch;
+            transition: background-color 0.3s;
         }
 
-        .message-item { display: flex; flex-direction: column; max-width: 80%; }
+        .message-item { display: flex; flex-direction: column; max-width: 85%; }
         .message-item.my-msg { align-self: flex-end; align-items: flex-end; }
         .message-item.other-msg { align-self: flex-start; align-items: flex-start; }
 
         .sender-info { font-size: 0.75rem; color: var(--text-sub); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
-        .online-dot { width: 8px; height: 8px; background-color: #22c55e; border-radius: 50%; }
+        
+        .online-dot { width: 8px; height: 8px; background-color: #94a3b8; border-radius: 50%; display: inline-block; }
+        .online-dot.active { background-color: #22c55e; }
 
-        .message-bubble { padding: 10px 16px; border-radius: 16px; font-size: 0.95rem; line-height: 1.4; word-break: break-all; }
-        .my-msg .message-bubble { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); color: white; border-bottom-right-radius: 4px; }
-        .other-msg .message-bubble { background-color: #ffffff; border: 1px solid var(--border-color); border-bottom-left-radius: 4px; }
+        .message-bubble { padding: 10px 14px; border-radius: 16px; font-size: 0.95rem; line-height: 1.4; word-break: break-all; }
+        .my-msg .message-bubble { background: var(--bubble-me); color: white; border-bottom-right-radius: 4px; }
+        .other-msg .message-bubble { background-color: var(--bubble-other); border: 1px solid var(--border-color); border-bottom-left-radius: 4px; color: var(--text-main); }
 
-        .delete-btn { font-size: 0.7rem; color: #ef4444; cursor: pointer; margin-top: 2px; border: none; background: none; }
+        .delete-btn { font-size: 0.7rem; color: #ef4444; cursor: pointer; margin-top: 4px; border: none; background: none; padding: 2px 4px; }
 
-        .chat-input-area { padding: 12px 16px; background-color: #ffffff; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; }
+        .chat-input-area {
+            padding: 10px 12px;
+            background-color: var(--header-bg);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-shrink: 0;
+            transition: background-color 0.3s;
+        }
         .input-row { display: flex; gap: 8px; align-items: center; }
-        input[type="text"] { background-color: var(--chat-bg); border: 1px solid var(--border-color); padding: 10px 12px; border-radius: 8px; outline: none; font-size: 0.9rem; }
-        #word { flex: 1; }
+        
+        input[type="text"] {
+            background-color: var(--chat-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 10px 12px;
+            border-radius: 8px;
+            outline: none;
+            font-size: 16px;
+        }
+        #word { flex: 1; min-width: 0; }
 
         button {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            background: var(--primary-color);
             color: white; border: none; padding: 10px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; white-space: nowrap; font-size: 0.85rem;
+            touch-action: manipulation;
+            transition: background 0.2s;
         }
+        button:hover { background: var(--primary-hover); }
 
         button.pending { background: #94a3b8; cursor: not-allowed; }
         button.secondary { background: transparent; border: 1px solid var(--border-color); color: var(--text-sub); }
+        button.danger { background: #ef4444; color: white; padding: 4px 8px; font-size: 0.75rem; }
 
         .sidebar {
             width: 240px;
-            background-color: #ffffff;
+            background-color: var(--sidebar-bg);
             border-left: 1px solid var(--border-color);
-            padding: 16px;
+            padding: 14px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 10px;
+            height: 100%;
+            transition: background-color 0.3s, border-color 0.3s;
         }
 
-        .sidebar-title { font-size: 0.95rem; font-weight: 700; border-bottom: 2px solid var(--yellow-light); padding-bottom: 6px; }
-        .room-list { list-style: none; display: flex; flex-direction: column; gap: 6px; flex: 1; overflow-y: auto; }
-        .room-item { padding: 8px 12px; border-radius: 8px; background: var(--chat-bg); cursor: pointer; font-weight: 600; font-size: 0.85rem; }
-        .room-item.active { background: var(--primary-yellow); color: white; }
-
-        @media (max-width: 640px) {
-            .app-container { flex-direction: column; }
-            .sidebar { width: 100%; height: 120px; border-left: none; border-top: 1px solid var(--border-color); padding: 10px; }
-            .room-list { flex-direction: row; overflow-x: auto; flex: none; }
-            .room-item { white-space: nowrap; }
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 6px;
+            flex-shrink: 0;
         }
+        .sidebar-title { font-size: 0.9rem; font-weight: 700; }
+        
+        .search-box {
+            width: 100%;
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .room-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+        
+        .room-item {
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: var(--card-bg);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            border: 1px solid var(--border-color);
+        }
+        .room-item.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+        .room-item.hidden { display: none !important; }
+
+        .unread-badge {
+            background-color: #ef4444;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 18px;
+            height: 18px;
+            line-height: 14px;
+            text-align: center;
+            display: none;
+            margin-left: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .unread-badge.active { display: inline-flex; align-items: center; justify-content: center; }
 
         .master-panel {
             display: none;
-            background-color: #fef3c7;
-            border: 1px solid #f59e0b;
+            background-color: var(--theme-light);
+            border: 1px solid var(--primary-color);
             padding: 8px 12px;
             border-radius: 8px;
             font-size: 0.8rem;
+            flex-shrink: 0;
+            max-height: 120px;
+            overflow-y: auto;
         }
         .master-panel.active { display: block; }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-card {
+            background: var(--card-bg);
+            color: var(--text-main);
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            gap: 8px;
+        }
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            padding: 8px 12px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            border-radius: 0;
+        }
+        .tab-btn.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .user-checkbox-list {
+            max-height: 220px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .member-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px dashed var(--border-color);
+            font-size: 0.85rem;
+        }
+        .member-row:last-child { border-bottom: none; }
+
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .theme-option {
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            background: var(--card-bg);
+            color: var(--text-main);
+        }
+        .theme-option.active { border-color: var(--primary-color); }
+        .color-preview { width: 24px; height: 24px; border-radius: 50%; }
+
+        @media screen and (max-width: 640px) {
+            .app-container { flex-direction: column !important; }
+            .sidebar {
+                width: 100% !important;
+                height: auto !important;
+                border-left: none !important;
+                border-bottom: 1px solid var(--border-color) !important;
+                padding: 8px 12px !important;
+                gap: 6px !important;
+                flex-shrink: 0 !important;
+            }
+            .sidebar-header { display: none !important; }
+            .sidebar-top-row {
+                display: flex !important;
+                gap: 6px !important;
+                align-items: center !important;
+                width: 100% !important;
+            }
+            .search-box {
+                flex: 1 !important;
+                font-size: 0.75rem !important;
+                padding: 6px 10px !important;
+            }
+            #mobileThemeBtn { display: inline-block !important; }
+            #createRoomBtn { padding: 6px 10px !important; font-size: 0.75rem !important; }
+            .room-list {
+                display: flex !important;
+                flex-direction: row !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                width: 100% !important;
+                align-items: center !important;
+                gap: 6px !important;
+                padding-bottom: 4px !important;
+                -webkit-overflow-scrolling: touch !important;
+            }
+            .room-item {
+                white-space: nowrap !important;
+                padding: 6px 12px !important;
+                font-size: 0.8rem !important;
+            }
+            .chat-main { flex: 1 !important; height: 0 !important; }
+            .chat-header { padding: 8px 12px !important; }
+            .chat-title { font-size: 0.9rem !important; }
+            .user-display { font-size: 0.75rem !important; padding: 2px 8px !important; }
+            button { padding: 6px 10px !important; font-size: 0.8rem !important; }
+        }
     </style>
 </head>
-<body>
+<body data-theme="orange">
 
 <div class="app-container">
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">ルーム一覧</div>
+            <button id="themeModalBtn" class="secondary" style="font-size:0.75rem; padding:2px 8px;">🎨 テーマ</button>
+        </div>
+        <div class="sidebar-top-row">
+            <input type="text" id="roomSearchInput" class="search-box" placeholder="🔍 ルーム絞り込み...">
+            <button id="mobileThemeBtn" class="secondary" style="font-size:0.75rem; padding:6px 8px;">🎨</button>
+            <button id="createRoomBtn">+ ルーム</button>
+        </div>
+        <ul class="room-list" id="roomList">
+            <li class="room-item active" data-room="general">
+                <span># 全般</span>
+                <span class="unread-badge" id="badge-general">0</span>
+            </li>
+            <li class="room-item" data-room="雑談">
+                <span># 雑談</span>
+                <span class="unread-badge" id="badge-雑談">0</span>
+            </li>
+        </ul>
+    </div>
+
     <div class="chat-main">
         <div class="chat-header">
             <div class="chat-title">
-                <span id="currentRoomTitle">檜垣の部屋 (全般)</span>
+                <span id="currentRoomTitle">檜垣の部屋 (# 全般)</span>
                 <span id="crownBadge" class="crown-icon">👑</span>
+                <button id="manageMembersBtn" class="secondary" style="display:none; font-size:0.75rem; padding:4px 8px;">👥 メンバー管理</button>
             </div>
             <div class="header-actions">
-                <div class="user-display">ログイン名: <span id="currentUserName">nanasi</span></div>
+                <div class="user-display"><span id="currentUserName">nanasi</span></div>
                 <button id="requestPaidBtn">有料会員に申請</button>
                 <button id="masterAuthBtn" class="secondary" style="display:none;">マスター管理</button>
             </div>
@@ -185,14 +526,86 @@
             </div>
         </div>
     </div>
+</div>
 
-    <div class="sidebar">
-        <div class="sidebar-title">ルーム一覧</div>
-        <ul class="room-list" id="roomList">
-            <li class="room-item active" data-room="general"># 全般</li>
-            <li class="room-item" data-room="雑談"># 雑談</li>
-        </ul>
-        <button id="createRoomBtn">+ ルーム作成</button>
+<!-- テーマ選択モーダル -->
+<div class="modal-overlay" id="themeModal">
+    <div class="modal-card">
+        <h3>カラーテーマ選択</h3>
+        <div class="theme-grid">
+            <div class="theme-option" data-theme-val="orange">
+                <div class="color-preview" style="background:#f59e0b;"></div>
+                オレンジ
+            </div>
+            <div class="theme-option" data-theme-val="blue">
+                <div class="color-preview" style="background:#3b82f6;"></div>
+                ブルー
+            </div>
+            <div class="theme-option" data-theme-val="green">
+                <div class="color-preview" style="background:#059669;"></div>
+                グリーン
+            </div>
+            <div class="theme-option" data-theme-val="purple">
+                <div class="color-preview" style="background:#7c3aed;"></div>
+                パープル
+            </div>
+            <div class="theme-option" data-theme-val="pink">
+                <div class="color-preview" style="background:#db2777;"></div>
+                ピンク
+            </div>
+            <div class="theme-option" data-theme-val="dark">
+                <div class="color-preview" style="background:#0f172a; border:1px solid #fff;"></div>
+                ダーク
+            </div>
+        </div>
+        <div style="display:flex; justify-content:flex-end;">
+            <button class="secondary" id="themeCloseBtn">閉じる</button>
+        </div>
+    </div>
+</div>
+
+<!-- ルーム作成モーダル -->
+<div class="modal-overlay" id="roomModal">
+    <div class="modal-card">
+        <h3>ルーム作成</h3>
+        <input type="text" id="modalRoomName" placeholder="ルーム名を入力">
+        <label><input type="checkbox" id="modalIsPrivate"> 特定メンバー限定にする</label>
+        
+        <div id="inviteArea" style="display:none;">
+            <p style="font-size:0.8rem; color:var(--text-sub);">初期メンバーを選択:</p>
+            <div class="user-checkbox-list" id="userCheckboxList"></div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:8px;">
+            <button class="secondary" id="modalCancelBtn">キャンセル</button>
+            <button id="modalSubmitBtn">作成</button>
+        </div>
+    </div>
+</div>
+
+<!-- メンバー管理モーダル -->
+<div class="modal-overlay" id="memberModal">
+    <div class="modal-card">
+        <h3 id="memberModalTitle">メンバー管理</h3>
+        
+        <div class="modal-tabs">
+            <button class="tab-btn active" id="tabCurrentBtn">参加中メンバー</button>
+            <button class="tab-btn" id="tabAddBtn">メンバーを追加</button>
+        </div>
+
+        <div id="tabCurrentContent">
+            <div class="user-checkbox-list" id="currentMemberList"></div>
+        </div>
+
+        <div id="tabAddContent" style="display:none;">
+            <p style="font-size:0.8rem; color:var(--text-sub); margin-bottom:6px;">追加したいユーザーにチェックを入れてください:</p>
+            <div class="user-checkbox-list" id="addMemberList"></div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:8px;">
+            <button class="secondary" id="memberCancelBtn">閉じる</button>
+            <button id="memberSubmitBtn" style="display:none;">追加を保存</button>
+        </div>
     </div>
 </div>
 
@@ -201,12 +614,17 @@
     let currentRoom = "general";
     let currentUserStatus = "free";
     let isMaster = false;
+    let onlineUserIds = [];
+    let allKnownUsers = [];
+    let roomMap = {};
+    let unreadCounts = {};
 
-    // パスワード保持（LocalStorage/SessionStorage）
     let currentUsername = localStorage.getItem('chat_username') || "nanasi";
     let masterPasswordInput = sessionStorage.getItem('chat_master_pass') || "";
 
-    // ユーザー一意識別ID
+    const savedTheme = localStorage.getItem('chat_theme') || "orange";
+    document.body.setAttribute('data-theme', savedTheme);
+
     let myUserId = localStorage.getItem('chat_userId');
     if (!myUserId) {
         myUserId = 'user_' + Math.random().toString(36).substring(2, 9);
@@ -220,12 +638,13 @@
     const masterPanel = document.getElementById('masterPanel');
     const currentUserNameSpan = document.getElementById('currentUserName');
     const masterAuthBtn = document.getElementById('masterAuthBtn');
+    const sendBtn = document.getElementById('sendBtn');
+    const roomList = document.getElementById('roomList');
+    const manageMembersBtn = document.getElementById('manageMembersBtn');
 
-    // UI名とマスター管理ボタンの制御
     function updateUserNameDisplay() {
         currentUserNameSpan.textContent = currentUsername;
 
-        // 名前が「檜垣」かつパスワードを保持している場合のみボタンを表示
         if (currentUsername === "檜垣" && masterPasswordInput === "oitalove09") {
             masterAuthBtn.style.display = "inline-block";
         } else {
@@ -235,25 +654,66 @@
         }
     }
 
+    function updateManageMembersBtnVisibility() {
+        const info = roomMap[currentRoom];
+        if (info && info.isPrivate) {
+            manageMembersBtn.style.display = "inline-block";
+        } else {
+            manageMembersBtn.style.display = "none";
+        }
+    }
+
     socket.onopen = () => {
         updateUserNameDisplay();
         socket.send(JSON.stringify({
             action: "sendmessage",
             actionType: "init",
-            data: { roomId: currentRoom, userId: myUserId }
+            data: { roomId: currentRoom, userId: myUserId, username: currentUsername }
         }));
     };
 
     socket.onmessage = (event) => {
         const res = JSON.parse(event.data);
 
-        if (res.type === "initResponse") {
+        if (res.type === "error") {
+            alert(res.message);
+        } else if (res.type === "initResponse") {
             currentUserStatus = res.data.userStatus;
             updateUserUI();
+            
+            if (res.data.customRooms) {
+                res.data.customRooms.forEach(r => {
+                    roomMap[r.roomId] = r;
+                    addRoomToList(r.roomId, r.isPrivate);
+                });
+            }
+
             chatLog.innerHTML = "";
             res.data.messages.forEach(msg => appendMessage(msg));
+            updateManageMembersBtnVisibility();
         } else if (res.type === "chat") {
-            if (res.data.roomId === currentRoom) appendMessage(res.data);
+            const msgRoom = res.data.roomId || "general";
+            if (msgRoom === currentRoom) {
+                appendMessage(res.data);
+            } else {
+                unreadCounts[msgRoom] = (unreadCounts[msgRoom] || 0) + 1;
+                updateUnreadBadge(msgRoom);
+            }
+        } else if (res.type === "onlineUsers") {
+            onlineUserIds = res.data.onlineUserIds || [];
+            allKnownUsers = res.data.users || [];
+            updateOnlineDots();
+        } else if (res.type === "roomCreated") {
+            roomMap[res.data.roomId] = res.data;
+            addRoomToList(res.data.roomId, res.data.isPrivate);
+        } else if (res.type === "roomMembersUpdated") {
+            if (roomMap[res.data.roomId]) {
+                roomMap[res.data.roomId].allowedUserIds = res.data.allowedUserIds;
+            }
+            if (res.data.roomId === currentRoom && !res.data.allowedUserIds.includes(myUserId)) {
+                alert("このルームのアクセス権限が変更されました。");
+                switchRoom("general", document.querySelector('[data-room="general"]'));
+            }
         } else if (res.type === "userStatusChanged") {
             if (res.data.userId === myUserId) {
                 currentUserStatus = res.data.status;
@@ -276,7 +736,7 @@
 
     function updateUserUI() {
         if (currentUserStatus === "paid") {
-            requestPaidBtn.textContent = "有料会員 (承認済み)";
+            requestPaidBtn.textContent = "有料会員";
             requestPaidBtn.className = "secondary";
             requestPaidBtn.disabled = true;
             crownBadge.classList.add("active");
@@ -286,7 +746,7 @@
             requestPaidBtn.disabled = true;
             crownBadge.classList.remove("active");
         } else {
-            requestPaidBtn.textContent = "有料会員に申請";
+            requestPaidBtn.textContent = "有料申請";
             requestPaidBtn.className = "";
             requestPaidBtn.disabled = false;
             crownBadge.classList.remove("active");
@@ -299,9 +759,11 @@
         itemDiv.className = `message-item ${isMe ? 'my-msg' : 'other-msg'}`;
         itemDiv.id = `msg-${msg.messageId}`;
 
+        const isOnline = onlineUserIds.includes(msg.userId);
+
         const infoDiv = document.createElement('div');
         infoDiv.className = 'sender-info';
-        infoDiv.innerHTML = `<span class="online-dot"></span> ${msg.username} ${msg.isPaid ? '👑' : ''}`;
+        infoDiv.innerHTML = `<span class="online-dot ${isOnline ? 'active' : ''}" data-userid="${msg.userId}"></span> ${msg.username} ${msg.isPaid ? '👑' : ''}`;
 
         const bubbleDiv = document.createElement('div');
         bubbleDiv.className = 'message-bubble';
@@ -313,13 +775,15 @@
         if (isMe && currentUserStatus === "paid") {
             const delBtn = document.createElement('button');
             delBtn.className = 'delete-btn';
-            delBtn.textContent = '送信取り消し';
+            delBtn.textContent = '削除';
             delBtn.onclick = () => {
-                socket.send(JSON.stringify({
-                    action: "sendmessage",
-                    actionType: "deleteMessage",
-                    data: { messageId: msg.messageId }
-                }));
+                if (socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({
+                        action: "sendmessage",
+                        actionType: "deleteMessage",
+                        data: { messageId: msg.messageId }
+                    }));
+                }
             };
             itemDiv.appendChild(delBtn);
         }
@@ -328,9 +792,37 @@
         chatLog.scrollTop = chatLog.scrollHeight;
     }
 
+    function updateOnlineDots() {
+        document.querySelectorAll('.online-dot').forEach(dot => {
+            const uid = dot.dataset.userid;
+            if (onlineUserIds.includes(uid)) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+    }
+
+    function updateUnreadBadge(roomId) {
+        const badge = document.getElementById(`badge-${roomId}`);
+        if (!badge) return;
+        const count = unreadCounts[roomId] || 0;
+        if (count > 0) {
+            badge.textContent = count > 99 ? '99+' : count;
+            badge.classList.add('active');
+        } else {
+            badge.classList.remove('active');
+        }
+    }
+
     function sendMessage() {
         const text = document.getElementById('word').value.trim();
         if (!text) return;
+
+        if (socket.readyState !== WebSocket.OPEN) {
+            alert("サーバーに接続されていません。");
+            return;
+        }
 
         socket.send(JSON.stringify({
             action: "sendmessage",
@@ -347,10 +839,7 @@
         document.getElementById('word').value = "";
     }
 
-    // 名前変更ボタンの処理
-// 名前変更ボタンの処理
     document.getElementById('changeNameBtn').addEventListener('click', () => {
-        // ★ 有料会員ではなく、かつ現在の名前が "nanasi" 以外の場合は変更不可
         if (currentUserStatus !== "paid" && currentUsername !== "nanasi") {
             const wantMaster = confirm("名前の変更は有料会員限定機能です。\n（※『檜垣』としてマスターログインする場合は「OK」を押してください）");
             if (!wantMaster) return;
@@ -361,12 +850,11 @@
 
         const trimmedName = newName.trim();
 
-        // 檜垣に設定しようとした場合のみパスワードを要求
         if (trimmedName === "檜垣") {
             const inputPass = prompt("【マスター認証】パスワードを入力してください:");
             if (inputPass === "oitalove09") {
                 masterPasswordInput = inputPass;
-                localStorage.setItem('chat_master_pass', inputPass);
+                sessionStorage.setItem('chat_master_pass', inputPass);
                 currentUsername = trimmedName;
                 localStorage.setItem('chat_username', currentUsername);
                 updateUserNameDisplay();
@@ -375,36 +863,38 @@
                 alert("パスワードが違います。");
             }
         } else {
-            // 無料ユーザーが nanasi 以外から他の一般名前に変えようとした場合をダブルチェック
             if (currentUserStatus !== "paid" && currentUsername !== "nanasi") {
                 alert("名前の変更は有料会員限定機能です。");
                 return;
             }
 
             masterPasswordInput = "";
-            localStorage.removeItem('chat_master_pass');
+            sessionStorage.removeItem('chat_master_pass');
             currentUsername = trimmedName;
             localStorage.setItem('chat_username', currentUsername);
             updateUserNameDisplay();
             alert(`お名前を「${currentUsername}」に変更しました。`);
         }
     });
-    
-    // 「マスター管理」ボタン押下時（パスワード要求なし）
+
     masterAuthBtn.addEventListener('click', () => {
-        socket.send(JSON.stringify({
-            action: "sendmessage",
-            actionType: "verifyMaster",
-            data: { username: currentUsername, masterPassword: masterPasswordInput }
-        }));
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                action: "sendmessage",
+                actionType: "verifyMaster",
+                data: { username: currentUsername, masterPassword: masterPasswordInput }
+            }));
+        }
     });
 
     requestPaidBtn.addEventListener('click', () => {
-        socket.send(JSON.stringify({
-            action: "sendmessage",
-            actionType: "requestPaid",
-            data: { userId: myUserId, username: currentUsername }
-        }));
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                action: "sendmessage",
+                actionType: "requestPaid",
+                data: { userId: myUserId, username: currentUsername }
+            }));
+        }
     });
 
     function renderPendingUsers(pendingUsers) {
@@ -423,41 +913,271 @@
     }
 
     window.approve = (targetUserId, targetUsername, approve) => {
-        socket.send(JSON.stringify({
-            action: "sendmessage",
-            actionType: "approveUser",
-            data: {
-                username: currentUsername,
-                masterPassword: masterPasswordInput,
-                targetUserId: targetUserId,
-                targetUsername: targetUsername,
-                approve: approve
-            }
-        }));
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                action: "sendmessage",
+                actionType: "approveUser",
+                data: {
+                    username: currentUsername,
+                    masterPassword: masterPasswordInput,
+                    targetUserId: targetUserId,
+                    targetUsername: targetUsername,
+                    approve: approve
+                }
+            }));
+        }
     };
 
-    document.getElementById('sendBtn').addEventListener('click', sendMessage);
+    sendBtn.addEventListener('click', sendMessage);
     document.getElementById('word').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
-    document.getElementById('createRoomBtn').addEventListener('click', () => {
-        if (currentUserStatus !== "paid") { alert("ルーム作成は有料会員限定機能です。"); return; }
-        const roomName = prompt("新しいルーム名:");
-        if (roomName) {
-            const li = document.createElement('li');
-            li.className = 'room-item';
-            li.dataset.room = roomName;
-            li.textContent = `# ${roomName}`;
-            li.onclick = () => switchRoom(roomName, li);
-            document.getElementById('roomList').appendChild(li);
+    document.getElementById('roomSearchInput').addEventListener('input', (e) => {
+        const query = e.target.value.trim().toLowerCase();
+        document.querySelectorAll('#roomList .room-item').forEach(el => {
+            const roomName = el.dataset.room.toLowerCase();
+            if (roomName.includes(query)) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        });
+    });
+
+    function addRoomToList(roomId, isPrivate) {
+        if (document.querySelector(`.room-item[data-room="${roomId}"]`)) return;
+
+        const li = document.createElement('li');
+        li.className = 'room-item';
+        li.dataset.room = roomId;
+        li.dataset.isPrivate = isPrivate ? "true" : "false";
+
+        const prefix = isPrivate ? '🔒 ' : '# ';
+        li.innerHTML = `
+            <span>${prefix}${roomId}</span>
+            <span class="unread-badge" id="badge-${roomId}">0</span>
+        `;
+        li.onclick = () => switchRoom(roomId, li);
+        roomList.appendChild(li);
+    }
+
+    const themeModal = document.getElementById('themeModal');
+    const themeModalBtn = document.getElementById('themeModalBtn');
+    const mobileThemeBtn = document.getElementById('mobileThemeBtn');
+    
+    function openThemeModal() { themeModal.classList.add('active'); }
+    themeModalBtn.addEventListener('click', openThemeModal);
+    mobileThemeBtn.addEventListener('click', openThemeModal);
+    
+    document.getElementById('themeCloseBtn').addEventListener('click', () => {
+        themeModal.classList.remove('active');
+    });
+
+    document.querySelectorAll('.theme-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            const selectedTheme = opt.dataset.themeVal;
+            document.body.setAttribute('data-theme', selectedTheme);
+            localStorage.setItem('chat_theme', selectedTheme);
+            themeModal.classList.remove('active');
+        });
+    });
+
+    const roomModal = document.getElementById('roomModal');
+    const modalIsPrivate = document.getElementById('modalIsPrivate');
+    const inviteArea = document.getElementById('inviteArea');
+    const userCheckboxList = document.getElementById('userCheckboxList');
+
+    modalIsPrivate.addEventListener('change', (e) => {
+        inviteArea.style.display = e.target.checked ? 'block' : 'none';
+        if (e.target.checked) {
+            userCheckboxList.innerHTML = allKnownUsers
+                .filter(u => u.userId !== myUserId)
+                .map(u => `<label style="display:block;"><input type="checkbox" value="${u.userId}"> ${u.username}</label>`)
+                .join('');
+            if (!userCheckboxList.innerHTML) userCheckboxList.innerHTML = '<span style="font-size:0.8rem; color:var(--text-sub);">他のユーザーがまだいません</span>';
         }
     });
 
+    document.getElementById('createRoomBtn').addEventListener('click', () => {
+        if (currentUserStatus !== "paid") { alert("ルーム作成は有料会員限定機能です。"); return; }
+        document.getElementById('modalRoomName').value = "";
+        modalIsPrivate.checked = false;
+        inviteArea.style.display = 'none';
+        roomModal.classList.add('active');
+    });
+
+    document.getElementById('modalCancelBtn').addEventListener('click', () => { roomModal.classList.remove('active'); });
+
+    document.getElementById('modalSubmitBtn').addEventListener('click', () => {
+        const roomName = document.getElementById('modalRoomName').value.trim();
+        if (!roomName) { alert("ルーム名を入力してください。"); return; }
+
+        const isPrivate = modalIsPrivate.checked;
+        const selectedUserIds = [myUserId];
+
+        if (isPrivate) {
+            userCheckboxList.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+                selectedUserIds.push(cb.value);
+            });
+        }
+
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                action: "sendmessage",
+                actionType: "createRoom",
+                data: {
+                    roomId: roomName,
+                    isPrivate: isPrivate,
+                    allowedUserIds: selectedUserIds,
+                    userId: myUserId
+                }
+            }));
+        }
+
+        roomModal.classList.remove('active');
+    });
+
+    const memberModal = document.getElementById('memberModal');
+    const tabCurrentBtn = document.getElementById('tabCurrentBtn');
+    const tabAddBtn = document.getElementById('tabAddBtn');
+    const tabCurrentContent = document.getElementById('tabCurrentContent');
+    const tabAddContent = document.getElementById('tabAddContent');
+    const currentMemberList = document.getElementById('currentMemberList');
+    const addMemberList = document.getElementById('addMemberList');
+    const memberSubmitBtn = document.getElementById('memberSubmitBtn');
+
+    tabCurrentBtn.addEventListener('click', () => {
+        tabCurrentBtn.classList.add('active');
+        tabAddBtn.classList.remove('active');
+        tabCurrentContent.style.display = 'block';
+        tabAddContent.style.display = 'none';
+        memberSubmitBtn.style.display = 'none';
+    });
+
+    tabAddBtn.addEventListener('click', () => {
+        tabAddBtn.classList.add('active');
+        tabCurrentBtn.classList.remove('active');
+        tabAddContent.style.display = 'block';
+        tabCurrentContent.style.display = 'none';
+        memberSubmitBtn.style.display = 'inline-block';
+    });
+
+    manageMembersBtn.addEventListener('click', () => {
+        const info = roomMap[currentRoom];
+        if (!info || !info.isPrivate) return;
+
+        document.getElementById('memberModalTitle').textContent = `「🔒 ${currentRoom}」メンバー管理`;
+
+        const currentAllowed = info.allowedUserIds || [];
+
+        currentMemberList.innerHTML = allKnownUsers
+            .filter(u => currentAllowed.includes(u.userId))
+            .map(u => {
+                const isOwner = (u.userId === info.createdBy);
+                const isOnline = onlineUserIds.includes(u.userId);
+                return `
+                    <div class="member-row">
+                        <div>
+                            <span class="online-dot ${isOnline ? 'active' : ''}"></span>
+                            <strong style="margin-left:4px;">${u.username}</strong>
+                            ${isOwner ? '<span style="font-size:0.75rem; color:var(--primary-color);">(作成者)</span>' : ''}
+                        </div>
+                        ${!isOwner ? `<button class="danger" onclick="removeMember('${u.userId}')">削除</button>` : ''}
+                    </div>
+                `;
+            })
+            .join('');
+
+        const notMembers = allKnownUsers.filter(u => !currentAllowed.includes(u.userId));
+        if (notMembers.length > 0) {
+            addMemberList.innerHTML = notMembers.map(u => `
+                <label style="display:flex; justify-content:space-between; align-items:center;">
+                    <span><input type="checkbox" value="${u.userId}"> ${u.username}</span>
+                    <span class="online-dot ${onlineUserIds.includes(u.userId) ? 'active' : ''}"></span>
+                </label>
+            `).join('');
+        } else {
+            addMemberList.innerHTML = '<span style="font-size:0.8rem; color:var(--text-sub);">追加可能なユーザーはいません</span>';
+        }
+
+        tabCurrentBtn.click();
+        memberModal.classList.add('active');
+    });
+
+    window.removeMember = (targetUserId) => {
+        if (!confirm("このメンバーをルームから削除しますか？")) return;
+
+        const info = roomMap[currentRoom];
+        if (!info) return;
+
+        const updatedAllowedList = (info.allowedUserIds || []).filter(id => id !== targetUserId);
+
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                action: "sendmessage",
+                actionType: "updateRoomMembers",
+                data: {
+                    roomId: currentRoom,
+                    allowedUserIds: updatedAllowedList,
+                    userId: myUserId
+                }
+            }));
+        }
+
+        memberModal.classList.remove('active');
+    };
+
+    document.getElementById('memberCancelBtn').addEventListener('click', () => { memberModal.classList.remove('active'); });
+
+    document.getElementById('memberSubmitBtn').addEventListener('click', () => {
+        const info = roomMap[currentRoom];
+        if (!info) return;
+
+        const updatedAllowedList = [...(info.allowedUserIds || [])];
+        
+        addMemberList.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+            if (!updatedAllowedList.includes(cb.value)) {
+                updatedAllowedList.push(cb.value);
+            }
+        });
+
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                action: "sendmessage",
+                actionType: "updateRoomMembers",
+                data: {
+                    roomId: currentRoom,
+                    allowedUserIds: updatedAllowedList,
+                    userId: myUserId
+                }
+            }));
+        }
+
+        memberModal.classList.remove('active');
+    });
+
     function switchRoom(roomId, el) {
-        currentRoom = roomId;
-        document.querySelectorAll('.room-item').forEach(i => i.classList.remove('active'));
-        el.classList.add('active');
-        document.getElementById('currentRoomTitle').textContent = `檜垣の部屋 (${roomId})`;
-        socket.send(JSON.stringify({ action: "sendmessage", actionType: "init", data: { roomId, userId: myUserId } }));
+        if (currentRoom === roomId) return;
+
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                action: "sendmessage",
+                actionType: "init",
+                data: { roomId, userId: myUserId, username: currentUsername }
+            }));
+
+            currentRoom = roomId;
+            
+            unreadCounts[roomId] = 0;
+            updateUnreadBadge(roomId);
+
+            document.querySelectorAll('.room-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            const isPrivate = el.dataset.isPrivate === "true";
+            
+            const prefix = isPrivate ? '🔒 ' : '# ';
+            document.getElementById('currentRoomTitle').textContent = `檜垣の部屋 (${prefix}${roomId})`;
+            updateManageMembersBtnVisibility();
+        }
     }
 
     document.querySelectorAll('.room-item').forEach(el => {

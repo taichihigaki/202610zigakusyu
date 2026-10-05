@@ -8,6 +8,7 @@ const docClient = DynamoDBDocumentClient.from(ddbClient);
 const CONNECTIONS_TABLE = "chat-connections";
 const MESSAGES_TABLE = "chat-messages";
 const USERS_TABLE = "chat-users";
+const ROOMS_TABLE = "chat-rooms";
 
 const MASTER_NAME = "檜垣";
 const MASTER_PASSWORD = "oitalove09";
@@ -22,19 +23,28 @@ export const handler = async (event) => {
     endpoint: `https://${domainName}/${stage}`
   });
 
-  const broadcast = async (data) => {
+  const broadcast = async (data, filterFn = null) => {
     const scanResult = await docClient.send(new ScanCommand({ TableName: CONNECTIONS_TABLE }));
     const connections = scanResult.Items || [];
-    const promises = connections.map(async ({ connectionId: connId }) => {
+    const promises = connections.map(async (conn) => {
+      if (filterFn && !filterFn(conn)) return;
       try {
-        await apigw.send(new PostToConnectionCommand({ ConnectionId: connId, Data: JSON.stringify(data) }));
+        await apigw.send(new PostToConnectionCommand({ ConnectionId: conn.connectionId, Data: JSON.stringify(data) }));
       } catch (e) {
         if (e.$metadata && e.$metadata.httpStatusCode === 410) {
-          await docClient.send(new DeleteCommand({ TableName: CONNECTIONS_TABLE, Key: { connectionId: connId } }));
+          await docClient.send(new DeleteCommand({ TableName: CONNECTIONS_TABLE, Key: { connectionId: conn.connectionId } }));
         }
       }
     });
     await Promise.all(promises);
+  };
+
+  const notifyOnlineUsers = async () => {
+    const scanResult = await docClient.send(new ScanCommand({ TableName: CONNECTIONS_TABLE }));
+    const onlineUserIds = [...new Set((scanResult.Items || []).map(item => item.userId).filter(Boolean))];
+    const allUsersRes = await docClient.send(new ScanCommand({ TableName: USERS_TABLE }));
+    const users = (allUsersRes.Items || []).map(u => ({ userId: u.userId, username: u.username }));
+    await broadcast({ type: "onlineUsers", data: { onlineUserIds, users } });
   };
 
   if (routeKey === "$connect") {
@@ -44,6 +54,7 @@ export const handler = async (event) => {
 
   if (routeKey === "$disconnect") {
     await docClient.send(new DeleteCommand({ TableName: CONNECTIONS_TABLE, Key: { connectionId } }));
+    await notifyOnlineUsers();
     return { statusCode: 200, body: "Disconnected." };
   }
 
@@ -51,15 +62,49 @@ export const handler = async (event) => {
     const body = JSON.parse(event.body);
     const { actionType, data } = body;
 
-    // --- 初期化 & 履歴取得 ---
+    // --- 初期化 & 履歴・権限に応じたルーム一覧の取得 ---
     if (actionType === "init") {
       const roomId = data?.roomId || "general";
       const userId = data?.userId;
+      const username = data?.username || "nanasi";
+
+      if (userId) {
+        await docClient.send(new PutCommand({ TableName: CONNECTIONS_TABLE, Item: { connectionId, userId } }));
+        
+        const userRes = await docClient.send(new GetCommand({ TableName: USERS_TABLE, Key: { userId } }));
+        const currentStatus = userRes.Item?.status || "free";
+        await docClient.send(new PutCommand({
+          TableName: USERS_TABLE,
+          Item: { userId, username, status: currentStatus, updatedAt: Date.now() }
+        }));
+      }
+
+      let roomInfo = null;
+      if (roomId !== "general" && roomId !== "雑談") {
+        const roomRes = await docClient.send(new GetCommand({ TableName: ROOMS_TABLE, Key: { roomId } }));
+        roomInfo = roomRes.Item;
+
+        if (roomInfo && roomInfo.isPrivate) {
+          const allowed = (roomInfo.allowedUserIds || []).includes(userId) || roomInfo.createdBy === userId;
+          if (!allowed) {
+            await apigw.send(new PostToConnectionCommand({
+              ConnectionId: connectionId,
+              Data: JSON.stringify({ type: "error", message: "このルームへのアクセス権限がありません。" })
+            }));
+            return { statusCode: 403 };
+          }
+        }
+      }
 
       const historyResult = await docClient.send(new ScanCommand({ TableName: MESSAGES_TABLE }));
       const messages = (historyResult.Items || [])
         .filter(m => (m.roomId || "general") === roomId)
         .sort((a, b) => a.timestamp - b.timestamp);
+
+      const roomsRes = await docClient.send(new ScanCommand({ TableName: ROOMS_TABLE }));
+      const customRooms = (roomsRes.Items || [])
+        .filter(r => !r.isPrivate || (r.allowedUserIds || []).includes(userId) || r.createdBy === userId)
+        .map(r => ({ roomId: r.roomId, isPrivate: r.isPrivate, allowedUserIds: r.allowedUserIds || [], createdBy: r.createdBy }));
 
       let userStatus = "free";
       if (userId) {
@@ -69,8 +114,57 @@ export const handler = async (event) => {
 
       await apigw.send(new PostToConnectionCommand({
         ConnectionId: connectionId,
-        Data: JSON.stringify({ type: "initResponse", data: { messages, userStatus } })
+        Data: JSON.stringify({ type: "initResponse", data: { messages, userStatus, customRooms, currentRoomInfo: roomInfo } })
       }));
+
+      await notifyOnlineUsers();
+      return { statusCode: 200 };
+    }
+
+    // --- プライベートルーム作成 ---
+    if (actionType === "createRoom") {
+      const { roomId, isPrivate, allowedUserIds, userId } = data;
+      
+      const allowedList = Array.isArray(allowedUserIds) ? allowedUserIds : [];
+      if (!allowedList.includes(userId)) allowedList.push(userId);
+
+      const roomItem = {
+        roomId,
+        isPrivate: !!isPrivate,
+        allowedUserIds: allowedList,
+        createdBy: userId,
+        createdAt: Date.now()
+      };
+
+      await docClient.send(new PutCommand({ TableName: ROOMS_TABLE, Item: roomItem }));
+
+      await broadcast(
+        { type: "roomCreated", data: { roomId, isPrivate: !!isPrivate, allowedUserIds: allowedList, createdBy: userId } },
+        (conn) => !isPrivate || allowedList.includes(conn.userId)
+      );
+      return { statusCode: 200 };
+    }
+
+    // ★ ルームのメンバー追加・削除（更新）
+    if (actionType === "updateRoomMembers") {
+      const { roomId, allowedUserIds, userId } = data;
+
+      const roomRes = await docClient.send(new GetCommand({ TableName: ROOMS_TABLE, Key: { roomId } }));
+      const roomInfo = roomRes.Item;
+      if (!roomInfo) return { statusCode: 404 };
+
+      const updatedAllowedList = Array.isArray(allowedUserIds) ? allowedUserIds : [];
+      if (!updatedAllowedList.includes(roomInfo.createdBy)) {
+        updatedAllowedList.push(roomInfo.createdBy); // 作成者は除外不可
+      }
+
+      roomInfo.allowedUserIds = updatedAllowedList;
+      await docClient.send(new PutCommand({ TableName: ROOMS_TABLE, Item: roomInfo }));
+
+      await broadcast({
+        type: "roomMembersUpdated",
+        data: { roomId, allowedUserIds: updatedAllowedList }
+      });
       return { statusCode: 200 };
     }
 
