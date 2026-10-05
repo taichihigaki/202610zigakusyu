@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>檜垣の部屋</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --primary-yellow: #f59e0b;
+            --primary-hover: #d97706;
+            --yellow-light: #fef3c7;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --border-color: #e2e8f0;
+            --chat-bg: #f1f5f9;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background-color: var(--card-bg);
+        }
+
+        .chat-header {
+            padding: 14px 20px;
+            border-bottom: 2px solid var(--yellow-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ffffff;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .chat-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .crown-icon {
+            color: #f59e0b;
+            font-size: 1.1rem;
+            display: none;
+        }
+
+        .crown-icon.active { display: inline-block; }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-display {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            background-color: var(--chat-bg);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        #chat-log {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            background-color: var(--chat-bg);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message-item { display: flex; flex-direction: column; max-width: 80%; }
+        .message-item.my-msg { align-self: flex-end; align-items: flex-end; }
+        .message-item.other-msg { align-self: flex-start; align-items: flex-start; }
+
+        .sender-info { font-size: 0.75rem; color: var(--text-sub); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+        .online-dot { width: 8px; height: 8px; background-color: #22c55e; border-radius: 50%; }
+
+        .message-bubble { padding: 10px 16px; border-radius: 16px; font-size: 0.95rem; line-height: 1.4; word-break: break-all; }
+        .my-msg .message-bubble { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); color: white; border-bottom-right-radius: 4px; }
+        .other-msg .message-bubble { background-color: #ffffff; border: 1px solid var(--border-color); border-bottom-left-radius: 4px; }
+
+        .delete-btn { font-size: 0.7rem; color: #ef4444; cursor: pointer; margin-top: 2px; border: none; background: none; }
+
+        .chat-input-area { padding: 12px 16px; background-color: #ffffff; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; }
+        .input-row { display: flex; gap: 8px; align-items: center; }
+        input[type="text"] { background-color: var(--chat-bg); border: 1px solid var(--border-color); padding: 10px 12px; border-radius: 8px; outline: none; font-size: 0.9rem; }
+        #word { flex: 1; }
+
+        button {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white; border: none; padding: 10px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; white-space: nowrap; font-size: 0.85rem;
+        }
+
+        button.pending { background: #94a3b8; cursor: not-allowed; }
+        button.secondary { background: transparent; border: 1px solid var(--border-color); color: var(--text-sub); }
+
+        .sidebar {
+            width: 240px;
+            background-color: #ffffff;
+            border-left: 1px solid var(--border-color);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .sidebar-title { font-size: 0.95rem; font-weight: 700; border-bottom: 2px solid var(--yellow-light); padding-bottom: 6px; }
+        .room-list { list-style: none; display: flex; flex-direction: column; gap: 6px; flex: 1; overflow-y: auto; }
+        .room-item { padding: 8px 12px; border-radius: 8px; background: var(--chat-bg); cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+        .room-item.active { background: var(--primary-yellow); color: white; }
+
+        @media (max-width: 640px) {
+            .app-container { flex-direction: column; }
+            .sidebar { width: 100%; height: 120px; border-left: none; border-top: 1px solid var(--border-color); padding: 10px; }
+            .room-list { flex-direction: row; overflow-x: auto; flex: none; }
+            .room-item { white-space: nowrap; }
+        }
+
+        .master-panel {
+            display: none;
+            background-color: #fef3c7;
+            border: 1px solid #f59e0b;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+        }
+        .master-panel.active { display: block; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="chat-main">
+        <div class="chat-header">
+            <div class="chat-title">
+                <span id="currentRoomTitle">檜垣の部屋 (全般)</span>
+                <span id="crownBadge" class="crown-icon">👑</span>
+            </div>
+            <div class="header-actions">
+                <div class="user-display">ログイン名: <span id="currentUserName">nanasi</span></div>
+                <button id="requestPaidBtn">有料会員に申請</button>
+                <button id="masterAuthBtn" class="secondary" style="display:none;">マスター管理</button>
+            </div>
+        </div>
+
+        <div id="masterPanel" class="master-panel">
+            <strong>【マスター承認パネル】</strong>
+            <div id="pendingList">未承認の申請はありません</div>
+        </div>
+
+        <div id="chat-log"></div>
+
+        <div class="chat-input-area">
+            <div class="input-row">
+                <input type="text" id="word" placeholder="メッセージを入力..." autocomplete="off">
+                <button id="sendBtn">送信</button>
+                <button id="changeNameBtn" class="secondary">名前変更</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <div class="sidebar-title">ルーム一覧</div>
+        <ul class="room-list" id="roomList">
+            <li class="room-item active" data-room="general"># 全般</li>
+            <li class="room-item" data-room="雑談"># 雑談</li>
+        </ul>
+        <button id="createRoomBtn">+ ルーム作成</button>
+    </div>
+</div>
+
+<script>
+    const WEBSOCKET_URL = "wss://coyq81zjuc.execute-api.ap-northeast-1.amazonaws.com/production/";
+    let currentRoom = "general";
+    let currentUserStatus = "free";
+    let isMaster = false;
+
+    // パスワード保持（LocalStorage/SessionStorage）
+    let currentUsername = localStorage.getItem('chat_username') || "nanasi";
+    let masterPasswordInput = sessionStorage.getItem('chat_master_pass') || "";
+
+    // ユーザー一意識別ID
+    let myUserId = localStorage.getItem('chat_userId');
+    if (!myUserId) {
+        myUserId = 'user_' + Math.random().toString(36).substring(2, 9);
+        localStorage.setItem('chat_userId', myUserId);
+    }
+
+    const socket = new WebSocket(WEBSOCKET_URL);
+    const chatLog = document.getElementById('chat-log');
+    const requestPaidBtn = document.getElementById('requestPaidBtn');
+    const crownBadge = document.getElementById('crownBadge');
+    const masterPanel = document.getElementById('masterPanel');
+    const currentUserNameSpan = document.getElementById('currentUserName');
+    const masterAuthBtn = document.getElementById('masterAuthBtn');
+
+    // UI名とマスター管理ボタンの制御
+    function updateUserNameDisplay() {
+        currentUserNameSpan.textContent = currentUsername;
+
+        // 名前が「檜垣」かつパスワードを保持している場合のみボタンを表示
+        if (currentUsername === "檜垣" && masterPasswordInput === "oitalove09") {
+            masterAuthBtn.style.display = "inline-block";
+        } else {
+            masterAuthBtn.style.display = "none";
+            masterPanel.classList.remove("active");
+            isMaster = false;
+        }
+    }
+
+    socket.onopen = () => {
+        updateUserNameDisplay();
+        socket.send(JSON.stringify({
+            action: "sendmessage",
+            actionType: "init",
+            data: { roomId: currentRoom, userId: myUserId }
+        }));
+    };
+
+    socket.onmessage = (event) => {
+        const res = JSON.parse(event.data);
+
+        if (res.type === "initResponse") {
+            currentUserStatus = res.data.userStatus;
+            updateUserUI();
+            chatLog.innerHTML = "";
+            res.data.messages.forEach(msg => appendMessage(msg));
+        } else if (res.type === "chat") {
+            if (res.data.roomId === currentRoom) appendMessage(res.data);
+        } else if (res.type === "userStatusChanged") {
+            if (res.data.userId === myUserId) {
+                currentUserStatus = res.data.status;
+                updateUserUI();
+            }
+            if (isMaster) renderPendingUsers(res.data.pendingUsers);
+        } else if (res.type === "masterAuthResult") {
+            if (res.success) {
+                isMaster = true;
+                masterPanel.classList.add("active");
+                renderPendingUsers(res.pendingUsers);
+            } else {
+                alert(res.message);
+            }
+        } else if (res.type === "deleteMessage") {
+            const el = document.getElementById(`msg-${res.data.messageId}`);
+            if (el) el.remove();
+        }
+    };
+
+    function updateUserUI() {
+        if (currentUserStatus === "paid") {
+            requestPaidBtn.textContent = "有料会員 (承認済み)";
+            requestPaidBtn.className = "secondary";
+            requestPaidBtn.disabled = true;
+            crownBadge.classList.add("active");
+        } else if (currentUserStatus === "pending") {
+            requestPaidBtn.textContent = "申請中";
+            requestPaidBtn.className = "pending";
+            requestPaidBtn.disabled = true;
+            crownBadge.classList.remove("active");
+        } else {
+            requestPaidBtn.textContent = "有料会員に申請";
+            requestPaidBtn.className = "";
+            requestPaidBtn.disabled = false;
+            crownBadge.classList.remove("active");
+        }
+    }
+
+    function appendMessage(msg) {
+        const isMe = (msg.userId === myUserId);
+        const itemDiv = document.createElement('div');
+        itemDiv.className = `message-item ${isMe ? 'my-msg' : 'other-msg'}`;
+        itemDiv.id = `msg-${msg.messageId}`;
+
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'sender-info';
+        infoDiv.innerHTML = `<span class="online-dot"></span> ${msg.username} ${msg.isPaid ? '👑' : ''}`;
+
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.className = 'message-bubble';
+        bubbleDiv.textContent = msg.text;
+
+        itemDiv.appendChild(infoDiv);
+        itemDiv.appendChild(bubbleDiv);
+
+        if (isMe && currentUserStatus === "paid") {
+            const delBtn = document.createElement('button');
+            delBtn.className = 'delete-btn';
+            delBtn.textContent = '送信取り消し';
+            delBtn.onclick = () => {
+                socket.send(JSON.stringify({
+                    action: "sendmessage",
+                    actionType: "deleteMessage",
+                    data: { messageId: msg.messageId }
+                }));
+            };
+            itemDiv.appendChild(delBtn);
+        }
+
+        chatLog.appendChild(itemDiv);
+        chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    function sendMessage() {
+        const text = document.getElementById('word').value.trim();
+        if (!text) return;
+
+        socket.send(JSON.stringify({
+            action: "sendmessage",
+            actionType: "chat",
+            data: {
+                roomId: currentRoom,
+                userId: myUserId,
+                username: currentUsername,
+                text: text,
+                isPaid: (currentUserStatus === "paid"),
+                masterPassword: masterPasswordInput
+            }
+        }));
+        document.getElementById('word').value = "";
+    }
+
+    // 名前変更ボタンの処理
+// 名前変更ボタンの処理
+    document.getElementById('changeNameBtn').addEventListener('click', () => {
+        // ★ 有料会員ではなく、かつ現在の名前が "nanasi" 以外の場合は変更不可
+        if (currentUserStatus !== "paid" && currentUsername !== "nanasi") {
+            const wantMaster = confirm("名前の変更は有料会員限定機能です。\n（※『檜垣』としてマスターログインする場合は「OK」を押してください）");
+            if (!wantMaster) return;
+        }
+
+        const newName = prompt("新しいお名前を入力してください:", currentUsername);
+        if (!newName || !newName.trim()) return;
+
+        const trimmedName = newName.trim();
+
+        // 檜垣に設定しようとした場合のみパスワードを要求
+        if (trimmedName === "檜垣") {
+            const inputPass = prompt("【マスター認証】パスワードを入力してください:");
+            if (inputPass === "oitalove09") {
+                masterPasswordInput = inputPass;
+                localStorage.setItem('chat_master_pass', inputPass);
+                currentUsername = trimmedName;
+                localStorage.setItem('chat_username', currentUsername);
+                updateUserNameDisplay();
+                alert("マスター『檜垣』として認証しました。");
+            } else {
+                alert("パスワードが違います。");
+            }
+        } else {
+            // 無料ユーザーが nanasi 以外から他の一般名前に変えようとした場合をダブルチェック
+            if (currentUserStatus !== "paid" && currentUsername !== "nanasi") {
+                alert("名前の変更は有料会員限定機能です。");
+                return;
+            }
+
+            masterPasswordInput = "";
+            localStorage.removeItem('chat_master_pass');
+            currentUsername = trimmedName;
+            localStorage.setItem('chat_username', currentUsername);
+            updateUserNameDisplay();
+            alert(`お名前を「${currentUsername}」に変更しました。`);
+        }
+    });
+    
+    // 「マスター管理」ボタン押下時（パスワード要求なし）
+    masterAuthBtn.addEventListener('click', () => {
+        socket.send(JSON.stringify({
+            action: "sendmessage",
+            actionType: "verifyMaster",
+            data: { username: currentUsername, masterPassword: masterPasswordInput }
+        }));
+    });
+
+    requestPaidBtn.addEventListener('click', () => {
+        socket.send(JSON.stringify({
+            action: "sendmessage",
+            actionType: "requestPaid",
+            data: { userId: myUserId, username: currentUsername }
+        }));
+    });
+
+    function renderPendingUsers(pendingUsers) {
+        const pendingList = document.getElementById('pendingList');
+        if (!pendingUsers || pendingUsers.length === 0) {
+            pendingList.innerHTML = "未承認の申請はありません";
+            return;
+        }
+        pendingList.innerHTML = pendingUsers.map(u => `
+            <div style="margin-top:4px;">
+                ${u.username} (${u.userId}) 
+                <button onclick="approve('${u.userId}', '${u.username}', true)">承認</button>
+                <button class="secondary" onclick="approve('${u.userId}', '${u.username}', false)">拒否</button>
+            </div>
+        `).join('');
+    }
+
+    window.approve = (targetUserId, targetUsername, approve) => {
+        socket.send(JSON.stringify({
+            action: "sendmessage",
+            actionType: "approveUser",
+            data: {
+                username: currentUsername,
+                masterPassword: masterPasswordInput,
+                targetUserId: targetUserId,
+                targetUsername: targetUsername,
+                approve: approve
+            }
+        }));
+    };
+
+    document.getElementById('sendBtn').addEventListener('click', sendMessage);
+    document.getElementById('word').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+    document.getElementById('createRoomBtn').addEventListener('click', () => {
+        if (currentUserStatus !== "paid") { alert("ルーム作成は有料会員限定機能です。"); return; }
+        const roomName = prompt("新しいルーム名:");
+        if (roomName) {
+            const li = document.createElement('li');
+            li.className = 'room-item';
+            li.dataset.room = roomName;
+            li.textContent = `# ${roomName}`;
+            li.onclick = () => switchRoom(roomName, li);
+            document.getElementById('roomList').appendChild(li);
+        }
+    });
+
+    function switchRoom(roomId, el) {
+        currentRoom = roomId;
+        document.querySelectorAll('.room-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('currentRoomTitle').textContent = `檜垣の部屋 (${roomId})`;
+        socket.send(JSON.stringify({ action: "sendmessage", actionType: "init", data: { roomId, userId: myUserId } }));
+    }
+
+    document.querySelectorAll('.room-item').forEach(el => {
+        el.onclick = () => switchRoom(el.dataset.room, el);
+    });
+</script>
+</body>
+</html>
